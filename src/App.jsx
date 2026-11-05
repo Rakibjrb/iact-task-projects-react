@@ -2,6 +2,23 @@ import { useState } from "react";
 
 const App = () => {
   const [toggle, setToggle] = useState(false);
+  const [data, setData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+
+  const handleInputFields = (e) => {
+    const { name, value } = e.target;
+    setData((prev) => {
+      return { ...prev, [name]: value };
+    });
+  };
+
+  const handleSubmit = () => {
+    console.log(data);
+    alert("Output in Console");
+  };
 
   return (
     <main className="min-h-screen w-full bg-linear-to-br from-slate-50 via-slate-100 to-indigo-50 flex items-center justify-center p-4">
@@ -79,6 +96,8 @@ const App = () => {
               Full Name
             </label>
             <input
+              onChange={handleInputFields}
+              name="name"
               id="name"
               type="text"
               placeholder="Alex Morgan"
@@ -94,6 +113,8 @@ const App = () => {
               Email address
             </label>
             <input
+              onChange={handleInputFields}
+              name="email"
               id="email"
               type="email"
               placeholder="alex@example.com"
@@ -110,6 +131,8 @@ const App = () => {
             </label>
             <div className="relative">
               <input
+                onChange={handleInputFields}
+                name="password"
                 id="password"
                 type={toggle ? "text" : "password"}
                 placeholder="••••••••"
@@ -193,6 +216,7 @@ const App = () => {
 
           {/* Submit Button */}
           <button
+            onClick={handleSubmit}
             type="button"
             className="w-full py-3 px-4 mt-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white text-sm font-semibold shadow-md shadow-indigo-200 transition duration-150 cursor-pointer"
           >
