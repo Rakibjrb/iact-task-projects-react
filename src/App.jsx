@@ -1,12 +1,14 @@
 import AddModal from "./components/AddModal";
 import EditModal from "./components/EditModal";
 import DeleteModal from "./components/DeleteModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TodoCard from "./components/TodoCard";
 
-const FilterOptions = ["all", "active", "new", "completed"];
+export const FilterOptions = ["all", "new", "active", "completed"];
 
 const getSavedTodos = () => JSON.parse(localStorage.getItem("todos")) || [];
+const saveTodos = (data) => localStorage.setItem("todos", JSON.stringify(data));
+const deleteTodos = () => localStorage.removeItem("todos");
 
 const App = () => {
   const [todos, setTodos] = useState(getSavedTodos());
@@ -20,6 +22,7 @@ const App = () => {
     data: null,
   });
   const [filter, setFilter] = useState("all");
+  const [searchText, setSearchText] = useState("");
 
   const handleCreateNewTodo = (data) => {
     const uniqueId = `todo-id-${new Date().getMilliseconds()}-${Math.floor(Math.random() * 100000) + 100000}`;
@@ -29,20 +32,30 @@ const App = () => {
       status: "new",
     };
 
-    localStorage.setItem(
-      "todos",
-      JSON.stringify([...getSavedTodos(), newTodo]),
-    );
+    saveTodos([...getSavedTodos(), newTodo]);
     setTodos((prev) => [...prev, newTodo]);
     setShowAddModal(false);
+  };
+
+  const handleOnEdit = (data) => {
+    const savedTodos = getSavedTodos();
+    const updateTodo = savedTodos.filter((todo) => todo.id === data.id)[0];
+    updateTodo.title = data.title;
+    updateTodo.category = data.category;
+    updateTodo.priority = data.priority;
+    updateTodo.status = data.status;
+    deleteTodos();
+    saveTodos(savedTodos);
+    setTodos(savedTodos);
+    setShowEditModal({ show: false, data: null });
   };
 
   const handleDeleteTodo = () => {
     const deleteId = showDeleteModal.data.id;
     const updatedTodos = todos.filter((todo) => todo.id !== deleteId);
     setTodos(updatedTodos);
-    localStorage.removeItem("todos");
-    localStorage.setItem("todos", JSON.stringify(updatedTodos));
+    deleteTodos();
+    saveTodos(updatedTodos);
     setShowDeleteModal({ show: false, data: null });
   };
 
@@ -71,9 +84,13 @@ const App = () => {
   };
 
   const getStats = () => {
-    const totalTodos = todos.length;
-    const activeTodos = todos.filter((todo) => todo.status === "active");
-    const completedTodos = todos.filter((todo) => todo.status === "completed");
+    const totalTodos = getSavedTodos().length;
+    const activeTodos = getSavedTodos().filter(
+      (todo) => todo.status === "active",
+    );
+    const completedTodos = getSavedTodos().filter(
+      (todo) => todo.status === "completed",
+    );
 
     return {
       total: totalTodos,
@@ -81,6 +98,15 @@ const App = () => {
       completed: completedTodos.length,
     };
   };
+
+  useEffect(() => {
+    const searchTerm = searchText.toLowerCase();
+    const savedTodos = getSavedTodos();
+    const searchedTodos = savedTodos.filter((todo) =>
+      todo.title.toLowerCase().includes(searchTerm),
+    );
+    setTodos(searchedTodos);
+  }, [searchText]);
 
   return (
     <main className="min-h-screen w-full bg-linear-to-br from-slate-50 via-slate-100 to-indigo-50/40 py-8 px-4 sm:px-6">
@@ -167,8 +193,10 @@ const App = () => {
               🔍
             </span>
             <input
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
               type="text"
-              placeholder="Search tasks by keyword..."
+              placeholder="Search tasks by title..."
               className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition"
             />
           </div>
@@ -218,6 +246,12 @@ const App = () => {
                 <TodoCard
                   key={todo.id}
                   todo={todo}
+                  onEdit={(data) =>
+                    setShowEditModal({
+                      show: true,
+                      data,
+                    })
+                  }
                   onTodoDelete={(data) =>
                     setShowDeleteModal({ show: true, data })
                   }
@@ -234,7 +268,13 @@ const App = () => {
             onCreate={handleCreateNewTodo}
           />
         )}
-        {/* <EditModal /> */}
+        {showEditModal.show && (
+          <EditModal
+            data={showEditModal.data}
+            onCancel={() => setShowEditModal({ show: false, data: null })}
+            onEdit={handleOnEdit}
+          />
+        )}
         {showDeleteModal.show && (
           <DeleteModal
             data={showDeleteModal.data}

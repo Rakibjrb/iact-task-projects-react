@@ -1,8 +1,10 @@
-const TodoCard = ({ todo, onTodoDelete }) => {
-  const { id, title, category, priority } = todo;
+const TodoCard = ({ todo, onEdit, onTodoDelete }) => {
+  const { title, category, priority, status } = todo;
 
   return (
-    <div className="group flex items-center justify-between p-4 rounded-2xl border border-slate-200/80 bg-white hover:border-indigo-200 hover:shadow-xs transition">
+    <div
+      className={`${status === "completed" ? "bg-green-200" : status === "active" ? "bg-blue-200" : "bg-white"} group flex items-center justify-between p-4 rounded-2xl border border-slate-200/80 hover:border-indigo-200 hover:shadow-xs transition`}
+    >
       <div className="flex items-center gap-3.5 flex-1 min-w-0 pr-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
@@ -24,6 +26,7 @@ const TodoCard = ({ todo, onTodoDelete }) => {
       {/* Action Buttons */}
       <div className="flex items-center gap-2 shrink-0">
         <button
+          onClick={() => onEdit(todo)}
           type="button"
           className="p-2 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition cursor-pointer"
           title="Edit Task"

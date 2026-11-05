@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-const Categories = ["Work", "Personal", "Study", "Game"];
-const Priorities = ["Low", "Medium", "High"];
+export const Categories = ["Work", "Personal", "Study", "Game"];
+export const Priorities = ["Low", "Medium", "High"];
 
 const AddModal = ({ onCancel, onCreate }) => {
   const [todoTile, setTodoTitle] = useState("");
