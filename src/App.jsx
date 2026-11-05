@@ -4,7 +4,12 @@ import DeleteModal from "./components/DeleteModal";
 import { useState } from "react";
 import TodoCard from "./components/TodoCard";
 
+const FilterOptions = ["all", "active", "new", "completed"];
+
+const getSavedTodos = () => JSON.parse(localStorage.getItem("todos")) || [];
+
 const App = () => {
+  const [todos, setTodos] = useState(getSavedTodos());
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState({
     show: false,
@@ -14,20 +19,20 @@ const App = () => {
     show: false,
     data: null,
   });
-
-  const [todos, setTodos] = useState(
-    JSON.parse(localStorage.getItem("todos")) || [],
-  );
+  const [filter, setFilter] = useState("all");
 
   const handleCreateNewTodo = (data) => {
     const uniqueId = `todo-id-${new Date().getMilliseconds()}-${Math.floor(Math.random() * 100000) + 100000}`;
     const newTodo = {
       id: uniqueId,
       ...data,
+      status: "new",
     };
 
-    const savedTodos = JSON.parse(localStorage.getItem("todos")) || [];
-    localStorage.setItem("todos", JSON.stringify([...savedTodos, newTodo]));
+    localStorage.setItem(
+      "todos",
+      JSON.stringify([...getSavedTodos(), newTodo]),
+    );
     setTodos((prev) => [...prev, newTodo]);
     setShowAddModal(false);
   };
@@ -39,6 +44,45 @@ const App = () => {
     localStorage.removeItem("todos");
     localStorage.setItem("todos", JSON.stringify(updatedTodos));
     setShowDeleteModal({ show: false, data: null });
+  };
+
+  const handleFilter = (status) => {
+    setFilter(status);
+    const savedTodos = getSavedTodos();
+
+    if (status === FilterOptions[1]) {
+      const activeTodos = savedTodos.filter(
+        (todo) => todo.status === FilterOptions[1],
+      );
+      setTodos(activeTodos);
+    } else if (status === FilterOptions[2]) {
+      const activeTodos = savedTodos.filter(
+        (todo) => todo.status === FilterOptions[2],
+      );
+      setTodos(activeTodos);
+    } else if (status === FilterOptions[3]) {
+      const activeTodos = savedTodos.filter(
+        (todo) => todo.status === FilterOptions[3],
+      );
+      setTodos(activeTodos);
+    } else {
+      const activeTodos = savedTodos.filter(
+        (todo) => todo.status === FilterOptions[0],
+      );
+      setTodos(activeTodos);
+    }
+  };
+
+  const getStats = () => {
+    const totalTodos = todos.length;
+    const activeTodos = todos.filter((todo) => todo.status === "active");
+    const completedTodos = todos.filter((todo) => todo.status === "completed");
+
+    return {
+      total: totalTodos,
+      active: activeTodos.length,
+      completed: completedTodos.length,
+    };
   };
 
   return (
@@ -80,7 +124,9 @@ const App = () => {
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                 Total Tasks
               </p>
-              <p className="text-2xl font-bold text-slate-800 mt-1">12</p>
+              <p className="text-2xl font-bold text-slate-800 mt-1">
+                {getStats().total}
+              </p>
             </div>
             <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">
               📋
@@ -92,7 +138,9 @@ const App = () => {
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                 In Progress
               </p>
-              <p className="text-2xl font-bold text-amber-600 mt-1">4</p>
+              <p className="text-2xl font-bold text-amber-600 mt-1">
+                {getStats().active}
+              </p>
             </div>
             <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm">
               ⏳
@@ -104,7 +152,9 @@ const App = () => {
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                 Completed
               </p>
-              <p className="text-2xl font-bold text-emerald-600 mt-1">8</p>
+              <p className="text-2xl font-bold text-emerald-600 mt-1">
+                {getStats().completed}
+              </p>
             </div>
             <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">
               ✓
@@ -128,24 +178,16 @@ const App = () => {
 
           {/* Filters */}
           <div className="flex items-center gap-2 overflow-x-auto">
-            <button
-              type="button"
-              className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white cursor-pointer shadow-xs"
-            >
-              All (12)
-            </button>
-            <button
-              type="button"
-              className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
-            >
-              Active (4)
-            </button>
-            <button
-              type="button"
-              className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
-            >
-              Completed (8)
-            </button>
+            {FilterOptions.map((status, idx) => (
+              <button
+                onClick={() => handleFilter(status)}
+                key={`filter-by-${status}-${idx}`}
+                type="button"
+                className={`${filter === status && "bg-indigo-600 text-white"} px-3.5 py-1.5 rounded-xl text-xs font-semibold uppercase cursor-pointer shadow-xs border border-slate-200`}
+              >
+                {status}
+              </button>
+            ))}
           </div>
         </section>
 
