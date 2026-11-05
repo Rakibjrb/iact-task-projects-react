@@ -41,7 +41,6 @@ const App = () => {
             min={1}
             max={10}
             placeholder="1"
-            defaultValue={1}
             className="w-20 bg-white border border-slate-300 rounded-xl py-1.5 px-3 text-center text-sm font-semibold text-slate-800 shadow-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"
           />
         </div>
