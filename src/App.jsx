@@ -66,10 +66,7 @@ const App = () => {
       );
       setTodos(activeTodos);
     } else {
-      const activeTodos = savedTodos.filter(
-        (todo) => todo.status === FilterOptions[0],
-      );
-      setTodos(activeTodos);
+      setTodos(savedTodos);
     }
   };
 
